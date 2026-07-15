@@ -1,0 +1,81 @@
+<?php
+
+namespace App\Http\Controllers\Admin;
+
+use App\Models\Customer;
+use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
+use App\Models\Order;
+
+
+class OrderController extends Controller
+{
+    public function index()
+    {
+        $orders = Order::with('customer')
+            ->latest()
+            ->paginate(10);
+
+        return view('admin.orders.index', compact('orders'));
+    }
+
+    public function show(Order $order)
+    {
+        $order->load([
+            'customer',
+            'items.product'
+        ]);
+
+        return view('admin.orders.show', compact('order'));
+    }
+
+        public function update(Request $request, Order $order)
+        {
+            $request->validate([
+                'status' => 'required|in:Pending,Processing,Completed,Cancelled',
+            ]);
+
+            $order->update([
+                'status' => $request->status,
+            ]);
+
+            return redirect()
+                ->route('admin.orders.show', $order)
+                ->with('success', 'Order status updated successfully.');
+        }
+        
+    public function create()
+    {
+        return view('admin.orders.create');
+    }
+
+    public function store(Request $request)
+    {
+        $request->validate([
+            'name'         => 'required|string|max:255',
+            'phone'        => 'required|string|max:50',
+            'email'        => 'nullable|email|max:255',
+            'address'      => 'nullable|string|max:255',
+            'total_amount' => 'required|numeric|min:0',
+            'status'       => 'required|string',
+        ]);
+
+        $customer = Customer::create([
+            'name'    => $request->name,
+            'phone'   => $request->phone,
+            'email'   => $request->email,
+            'address' => $request->address,
+        ]);
+
+        Order::create([
+            'customer_id'  => $customer->id,
+            'order_number' => 'ORD-' . date('YmdHis'),
+            'total_amount' => $request->total_amount,
+            'status'       => $request->status,
+        ]);
+
+        return redirect()
+            ->route('admin.orders.index')
+            ->with('success', 'Test order created successfully.');
+    }
+}

@@ -3,11 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ $title ?? 'Admin Panel' }} - CitiCarCanada</title>
+
+
+    <title>{{ $title ?? 'Admin Panel' }} - Budlume</title>
+
+    <link rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
     {{-- Bootstrap --}}
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    
+
     {{-- Bootstrap Icons --}}
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
@@ -85,54 +90,60 @@
         }
     </style>
 </head>
+
 <body>
 
 <div class="admin-wrapper">
-    
+
     {{-- Sidebar --}}
     <div class="sidebar">
-        <div class="brand">🚗 CitiCarCanada</div>
+
+        <div class="brand">
+            🛍️ Budlume
+        </div>
 
         <nav class="nav flex-column">
-            <a href="{{ route('admin.dashboard') }}" class="nav-link">
-                <i class="bi bi-speedometer2"></i> Dashboard
+
+            <a href="{{ route('admin.dashboard') }}"
+               class="nav-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
+                <i class="bi bi-speedometer2"></i>
+                Dashboard
             </a>
 
-            <a href="#" class="nav-link">
-                <i class="bi bi-car-front"></i> Vehicle Management
-            </a>
-            
-            <a href="{{ route('admin.categories.index') }}" class="nav-link">
-                <i class="bi bi-tags"></i> Categories
+            <a href="{{ route('admin.categories.index') }}"
+               class="nav-link {{ request()->routeIs('admin.categories.*') ? 'active' : '' }}">
+                <i class="bi bi-tags"></i>
+                Categories
             </a>
 
-            <a href="#" class="nav-link">
-                <i class="bi bi-diagram-3"></i> Model
+            <a href="{{ route('admin.products.index') }}"
+               class="nav-link {{ request()->routeIs('admin.products.*') ? 'active' : '' }}">
+                <i class="bi bi-box-seam"></i>
+                Products
             </a>
 
-            <a href="#" class="nav-link">
-                <i class="bi bi-grid"></i> Body Type
+            <a href="{{ route('admin.orders.index') }}"
+               class="nav-link {{ request()->routeIs('admin.orders.*') ? 'active' : '' }}">
+                <i class="bi bi-cart"></i> Orders
             </a>
 
-            <a href="#" class="nav-link">
-                <i class="bi bi-fuel-pump"></i> Fuel Type
+          <a href="{{ route('admin.customers.index') }}"
+               class="nav-link {{ request()->routeIs('admin.customers.*') ? 'active' : '' }}">
+                <i class="bi bi-people"></i>
+                Customers
             </a>
 
-            <a href="#" class="nav-link">
-                <i class="bi bi-gear-wide-connected"></i> Transmission
-            </a>
+            <a href="{{ route('admin.contact-messages.index') }}"
+                   class="{{ request()->routeIs('admin.contact-messages.*') ? 'active' : '' }}">
+                    <i class="bi bi-envelope"></i>
+                    <span>Contact Messages</span>
+                </a>
 
             <a href="#" class="nav-link">
-                <i class="bi bi-people"></i> Customers
+                <i class="bi bi-gear"></i>
+                Settings
             </a>
 
-            <a href="#" class="nav-link">
-                <i class="bi bi-envelope"></i> Contact Messages
-            </a>
-
-            <a href="#" class="nav-link">
-                <i class="bi bi-gear"></i> Settings
-            </a>
         </nav>
     </div>
 
@@ -140,22 +151,35 @@
     <div class="main-content">
 
         {{-- Topbar --}}
-    <div class="topbar">
-        <h4 class="mb-0">{{ $title ?? 'Dashboard' }}</h4>
+        <div class="topbar">
 
-        <div class="d-flex align-items-center gap-3">
-            <span class="fw-semibold">
-                Welcome, {{ auth()->user()->name ?? 'Admin' }}
-            </span>
+            <h4 class="mb-0">
+                {{ $title ?? 'Dashboard' }}
+            </h4>
 
-            <a href="#" class="btn btn-danger btn-sm">Logout</a>
+            <div class="d-flex align-items-center gap-3">
+
+                <span class="fw-semibold">
+                    Welcome, {{ auth()->user()->name ?? 'Admin' }}
+                </span>
+
+               <form method="POST" action="{{ route('logout') }}" class="m-0">
+                @csrf
+
+                <button type="submit" class="btn btn-danger btn-sm">
+                    <i class="bi bi-box-arrow-right"></i>
+                    Logout
+                </button>
+            </form>
+
+            </div>
         </div>
-    </div>
 
         {{-- Content --}}
         <div class="content-area">
             @yield('content')
         </div>
+
     </div>
 </div>
 

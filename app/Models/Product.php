@@ -21,6 +21,13 @@ class Product extends Model
         'status',
     ];
 
+    protected $casts = [
+    'featured' => 'boolean',
+    'status' => 'boolean',
+    'price' => 'decimal:2',
+    'sale_price' => 'decimal:2',
+    ];
+
     public function category()
     {
         return $this->belongsTo(Category::class);
