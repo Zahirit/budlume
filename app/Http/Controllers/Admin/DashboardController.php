@@ -30,7 +30,8 @@ class DashboardController extends Controller
                             ->take(5)
                             ->get();
 
-        $latestProducts = Product::latest()
+        $latestProducts = Product::with('category')
+                            ->latest()
                             ->take(5)
                             ->get();
 

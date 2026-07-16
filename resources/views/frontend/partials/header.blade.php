@@ -34,15 +34,33 @@
             <span class="user-menu-arrow">▼</span>
         </button>
 
-        <div id="userDropdown" class="user-dropdown">
-            <a href="{{ route('profile.edit') }}">Profile</a>
+<div id="userDropdown" class="user-dropdown">
 
-            <form method="POST" action="{{ route('logout') }}">
-                @csrf
+    {{-- Dashboard --}}
+    <a href="{{ route('admin.dashboard') }}">
+        <i class="bi bi-speedometer2"></i>
+        Dashboard
+    </a>
 
-                <button type="submit">Logout</button>
-            </form>
-        </div>
+    {{-- Profile --}}
+    <a href="{{ route('profile.edit') }}">
+        <i class="bi bi-person-circle"></i>
+        Profile
+    </a>
+
+    <hr>
+
+    {{-- Logout --}}
+    <form method="POST" action="{{ route('logout') }}">
+        @csrf
+
+        <button type="submit">
+            <i class="bi bi-box-arrow-right"></i>
+            Logout
+        </button>
+    </form>
+
+</div>
 
     </div>
 @else

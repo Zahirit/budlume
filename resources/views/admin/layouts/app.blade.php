@@ -7,9 +7,6 @@
 
     <title>{{ $title ?? 'Admin Panel' }} - Budlume</title>
 
-    <link rel="stylesheet"
-    href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-
     {{-- Bootstrap --}}
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
@@ -184,6 +181,77 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+
+const chartCanvas = document.getElementById('salesChart');
+
+if(chartCanvas){
+
+new Chart(chartCanvas,{
+
+type:'line',
+
+data:{
+
+labels:[
+'Jan','Feb','Mar','Apr','May','Jun',
+'Jul','Aug','Sep','Oct','Nov','Dec'
+],
+
+datasets:[{
+
+label:'Sales',
+
+data:[12,19,15,22,28,24,35,30,40,38,45,50],
+
+borderColor:'#22c55e',
+
+backgroundColor:'rgba(34,197,94,.15)',
+
+fill:true,
+
+tension:.4,
+
+pointRadius:5
+
+}]
+
+},
+
+options:{
+
+responsive:true,
+
+maintainAspectRatio:false,
+
+plugins:{
+
+legend:{
+display:false
+}
+
+},
+
+scales:{
+
+y:{
+beginAtZero:true
+}
+
+}
+
+}
+
+});
+
+}
+
+</script>
 
 </body>
 </html>
