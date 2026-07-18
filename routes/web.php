@@ -42,14 +42,17 @@ Route::prefix('admin')
             [ProductController::class, 'deleteGalleryImage'])
             ->name('products.gallery.delete');
 
-        Route::patch('/orders/{order}/status', [OrderController::class, 'updateStatus'])
+        Route::patch('/orders/{order}/status', [AdminOrderController::class, 'update'])
     ->name('orders.updateStatus');
 
     Route::resource('contact-messages', ContactMessageController::class)
     ->only(['index', 'show']);
 
         Route::resource('orders', AdminOrderController::class)
-    ->only(['index', 'show', 'update']);
+    ->only(['index', 'create', 'store', 'show', 'update']);
+
+    Route::get('/orders/{order}/invoice', [AdminOrderController::class, 'invoice'])
+    ->name('orders.invoice');
 
         Route::get('/settings', [SettingController::class, 'index'])
          ->name('settings.index');
@@ -125,14 +128,6 @@ Route::middleware('auth')->group(function () {
 
             });
 
-            Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
 
-            Route::resource('orders', OrderController::class)->only([
-                'index',
-                'show',
-                'update'
-            ]);
-
-        });
 
 require __DIR__.'/auth.php';

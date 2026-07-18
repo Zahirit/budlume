@@ -7,9 +7,13 @@
 @section('content')
 <div class="card-box">
     <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2 class="mb-0">Order List</h2>
-</div>
+        <h2 class="mb-0">Order List</h2>
 
+        <a href="{{ route('admin.orders.create') }}"
+           class="btn btn-success">
+            + Create Test Order
+        </a>
+    </div>
     @if(session('success'))
         <div class="alert alert-success">
             {{ session('success') }}

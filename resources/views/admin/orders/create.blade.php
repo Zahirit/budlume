@@ -68,12 +68,23 @@
 
         <div class="mb-3">
             <label class="form-label">Status</label>
-            <select name="status" class="form-select">
-                <option value="pending">Pending</option>
-                <option value="confirmed">Confirmed</option>
-                <option value="completed">Completed</option>
-                <option value="cancelled">Cancelled</option>
-            </select>
+            <select name="status" class="form-select" required>
+    <option value="Pending" {{ old('status') == 'Pending' ? 'selected' : '' }}>
+        Pending
+    </option>
+
+    <option value="Processing" {{ old('status') == 'Processing' ? 'selected' : '' }}>
+        Processing
+    </option>
+
+    <option value="Completed" {{ old('status') == 'Completed' ? 'selected' : '' }}>
+        Completed
+    </option>
+
+    <option value="Cancelled" {{ old('status') == 'Cancelled' ? 'selected' : '' }}>
+        Cancelled
+    </option>
+</select>
         </div>
 
         <button type="submit" class="btn btn-success">

@@ -23,13 +23,27 @@
 
     <div class="mb-3">
         <strong>Email:</strong>
-        {{ $contactMessage->email ?? 'N/A' }}
-    </div>
 
-    <div class="mb-3">
+        @if($contactMessage->email)
+            <a href="mailto:{{ $contactMessage->email }}">
+                {{ $contactMessage->email }}
+            </a>
+        @else
+            N/A
+        @endif
+        </div>
+
+   <div class="mb-3">
         <strong>Phone:</strong>
-        {{ $contactMessage->phone ?? 'N/A' }}
-    </div>
+
+        @if($contactMessage->phone)
+            <a href="tel:{{ $contactMessage->phone }}">
+                {{ $contactMessage->phone }}
+            </a>
+        @else
+            N/A
+        @endif
+        </div>
 
     <div class="mb-3">
         <strong>Subject:</strong>
@@ -47,7 +61,7 @@
         <strong>Message:</strong>
 
         <div class="border rounded p-3 mt-2">
-            {{ $contactMessage->message }}
+            {!! nl2br(e($contactMessage->message)) !!}
         </div>
     </div>
 

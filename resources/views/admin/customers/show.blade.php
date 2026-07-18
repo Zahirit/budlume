@@ -16,7 +16,71 @@
         </a>
     </div>
 
+        {{-- Customer Summary --}}
+    @php
+        $totalOrders = $customer->orders->count();
+
+        $totalSpent = $customer->orders->sum('total_amount');
+
+        $pendingOrders = $customer->orders
+            ->filter(fn($order) => strtolower($order->status) === 'pending')
+            ->count();
+
+        $completedOrders = $customer->orders
+            ->filter(fn($order) => strtolower($order->status) === 'completed')
+            ->count();
+    @endphp
+
+    <div class="row g-3 mb-4">
+
+        <div class="col-md-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <small class="text-muted">Total Orders</small>
+                    <h3 class="mb-0 mt-2">
+                        {{ $totalOrders }}
+                    </h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <small class="text-muted">Total Spent</small>
+                    <h3 class="mb-0 mt-2">
+                        ${{ number_format($totalSpent, 2) }}
+                    </h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <small class="text-muted">Pending Orders</small>
+                    <h3 class="mb-0 mt-2">
+                        {{ $pendingOrders }}
+                    </h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <small class="text-muted">Completed Orders</small>
+                    <h3 class="mb-0 mt-2">
+                        {{ $completedOrders }}
+                    </h3>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
     {{-- Customer Information --}}
+
     <div class="mb-4">
         <h5>Customer Information</h5>
 

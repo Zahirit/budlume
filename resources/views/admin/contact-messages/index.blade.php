@@ -7,7 +7,42 @@
 @section('content')
 <div class="card-box">
 
-    <h2 class="mb-4">Contact Messages</h2>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+    <div>
+        <h2 class="mb-1">Contact Messages</h2>
+
+        <small class="text-muted">
+            Total Messages:
+            <strong>{{ $messages->total() }}</strong>
+        </small>
+    </div>
+
+    <form method="GET"
+          action="{{ route('admin.contact-messages.index') }}"
+          class="d-flex">
+
+        <input type="text"
+               name="search"
+               value="{{ request('search') }}"
+               class="form-control me-2"
+               placeholder="Search messages...">
+
+        <button type="submit"
+                class="btn btn-primary">
+            Search
+        </button>
+
+        @if(request('search'))
+            <a href="{{ route('admin.contact-messages.index') }}"
+               class="btn btn-secondary ms-2">
+                Clear
+            </a>
+        @endif
+
+    </form>
+
+</div>
 
     <div class="table-responsive">
         <table class="table table-bordered align-middle">

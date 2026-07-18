@@ -1,3 +1,10 @@
+@php
+    $setting = \App\Models\Setting::first();
+@endphp
+
+<!DOCTYPE html>
+<html lang="en">
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -96,8 +103,9 @@
     <div class="sidebar">
 
         <div class="brand">
-            🛍️ Budlume
-        </div>
+
+    <span>{{ $setting->site_name ?? 'Budlume' }}</span>
+    </div>
 
         <nav class="nav flex-column">
 
@@ -130,13 +138,14 @@
                 Customers
             </a>
 
-            <a href="{{ route('admin.contact-messages.index') }}"
-                   class="{{ request()->routeIs('admin.contact-messages.*') ? 'active' : '' }}">
+           <a href="{{ route('admin.contact-messages.index') }}"
+                class="nav-link {{ request()->routeIs('admin.contact-messages.*') ? 'active' : '' }}">
                     <i class="bi bi-envelope"></i>
                     <span>Contact Messages</span>
                 </a>
 
-            <a href="#" class="nav-link">
+           <a href="{{ route('admin.settings.index') }}"
+               class="nav-link {{ request()->routeIs('admin.settings.*') ? 'active' : '' }}">
                 <i class="bi bi-gear"></i>
                 Settings
             </a>

@@ -58,7 +58,7 @@
     </div>
 
 </div>
-    </div>
+</div>
 
 <div class="col-xl-4 col-md-6 mb-4">
 
@@ -421,4 +421,350 @@
 
 </div>
 
+<hr class="my-4">
+
+<div class="card shadow-sm mb-4">
+
+    <div class="card-header">
+        <strong>👥 Recent Customers</strong>
+    </div>
+
+    <div class="card-body">
+
+        <div class="table-responsive">
+
+            <table class="table table-hover align-middle">
+
+                <thead class="table-dark">
+
+                    <tr>
+                        <th width="70">#</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Joined</th>
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                @forelse($latestCustomers as $customer)
+
+                    <tr>
+
+                        <td>{{ $loop->iteration }}</td>
+
+                        <td>
+
+                            <strong>
+                                {{ $customer->name }}
+                            </strong>
+
+                        </td>
+
+                        <td>{{ $customer->email }}</td>
+
+                        <td>
+
+                            <strong>
+                                {{ $customer->created_at->format('d M Y') }}
+                            </strong>
+
+                            <br>
+
+                            <small class="text-muted">
+                                {{ $customer->created_at->diffForHumans() }}
+                            </small>
+
+                        </td>
+
+                    </tr>
+
+                @empty
+
+                    <tr>
+
+                        <td colspan="4" class="text-center">
+                            No customers found.
+                        </td>
+
+                    </tr>
+
+                @endforelse
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+        <div class="text-end mt-3">
+
+            <a href="{{ route('admin.customers.index') }}"
+               class="btn btn-primary btn-sm">
+
+                View All Customers →
+
+            </a>
+
+        </div>
+
+    </div>
+
+</div>
+
+<div class="card shadow-sm mb-4">
+
+    <div class="card-header">
+        <strong>⚠ Low Stock Products</strong>
+    </div>
+
+    <div class="card-body">
+
+        <div class="table-responsive">
+
+            <table class="table table-hover align-middle">
+
+                <thead class="table-dark">
+
+                    <tr>
+                        <th>Product</th>
+                        <th>Category</th>
+                        <th class="text-center">Stock</th>
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                @forelse($lowStockProducts as $product)
+
+                    <tr>
+
+                        <td>
+                            <strong>{{ $product->name }}</strong>
+                        </td>
+
+                        <td>
+                            {{ $product->category->name ?? '-' }}
+                        </td>
+
+                        <td class="text-center">
+
+                            <span class="badge bg-danger">
+                                {{ $product->stock }} Left
+                            </span>
+
+                        </td>
+
+                    </tr>
+
+                @empty
+
+                    <tr>
+
+                        <td colspan="3" class="text-center">
+                            🎉 No low stock products.
+                        </td>
+
+                    </tr>
+
+                @endforelse
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+        <div class="text-end mt-3">
+
+            <a href="{{ route('admin.products.index') }}"
+               class="btn btn-danger btn-sm">
+
+                Manage Products →
+
+            </a>
+
+        </div>
+
+    </div>
+
+</div>
+
+<div class="card shadow-sm mb-4">
+
+    <div class="card-header">
+        <strong>📩 Recent Contact Messages</strong>
+    </div>
+
+    <div class="card-body">
+
+        <div class="table-responsive">
+
+            <table class="table table-hover align-middle">
+
+                <thead class="table-dark">
+
+                    <tr>
+                        <th width="60">#</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Subject</th>
+                        <th width="120">Date</th>
+                        <th width="90">Action</th>
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                @forelse($recentMessages as $message)
+
+                    <tr>
+
+                        <td>{{ $loop->iteration }}</td>
+
+                        <td>
+                            <strong>{{ $message->name }}</strong>
+                        </td>
+
+                        <td>{{ $message->email }}</td>
+
+                        <td>{{ $message->subject }}</td>
+
+                        <td>
+                            <small>{{ optional($message->created_at)->format('d M Y') ?? '-' }}</small>
+                        </td>
+
+                        <td>
+
+                            <a href="{{ route('admin.contact-messages.index') }}"
+                               class="btn btn-sm btn-primary">
+
+                                View
+
+                            </a>
+
+                        </td>
+
+                    </tr>
+
+                @empty
+
+                    <tr>
+
+                        <td colspan="6" class="text-center">
+
+                            No contact messages found.
+
+                        </td>
+
+                    </tr>
+
+                @endforelse
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+        <div class="text-end mt-3">
+
+            <a href="{{ route('admin.contact-messages.index') }}"
+               class="btn btn-dark btn-sm">
+
+                View All Messages →
+
+            </a>
+
+        </div>
+
+    </div>
+
+</div>
+<div class="card shadow-sm mb-4">
+
+    <div class="card-header">
+
+        <strong>📊 Order Status Summary</strong>
+
+    </div>
+
+    <div class="card-body">
+
+        <div class="row g-3">
+
+            <div class="col-md-3">
+
+                <div class="card border-warning">
+
+                    <div class="card-body text-center">
+
+                        <h6 class="text-warning">Pending</h6>
+
+                        <h2>{{ $pendingOrders }}</h2>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="col-md-3">
+
+                <div class="card border-primary">
+
+                    <div class="card-body text-center">
+
+                        <h6 class="text-primary">Processing</h6>
+
+                        <h2>{{ $processingOrders }}</h2>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="col-md-3">
+
+                <div class="card border-success">
+
+                    <div class="card-body text-center">
+
+                        <h6 class="text-success">Completed</h6>
+
+                        <h2>{{ $completedOrders }}</h2>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="col-md-3">
+
+                <div class="card border-danger">
+
+                    <div class="card-body text-center">
+
+                        <h6 class="text-danger">Cancelled</h6>
+
+                        <h2>{{ $cancelledOrders }}</h2>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
 @endsection
+

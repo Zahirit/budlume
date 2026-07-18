@@ -2,11 +2,10 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Models\Customer;
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Models\Customer;
 use App\Models\Order;
-
+use Illuminate\Http\Request;
 
 class OrderController extends Controller
 {
@@ -23,27 +22,27 @@ class OrderController extends Controller
     {
         $order->load([
             'customer',
-            'items.product'
+            'items.product',
         ]);
 
         return view('admin.orders.show', compact('order'));
     }
 
-        public function update(Request $request, Order $order)
-        {
-            $request->validate([
-                'status' => 'required|in:Pending,Processing,Completed,Cancelled',
-            ]);
+    public function update(Request $request, Order $order)
+    {
+        $request->validate([
+            'status' => 'required|in:Pending,Processing,Completed,Cancelled',
+        ]);
 
-            $order->update([
-                'status' => $request->status,
-            ]);
+        $order->update([
+            'status' => $request->status,
+        ]);
 
-            return redirect()
-                ->route('admin.orders.show', $order)
-                ->with('success', 'Order status updated successfully.');
-        }
-        
+        return redirect()
+            ->route('admin.orders.show', $order)
+            ->with('success', 'Order status updated successfully.');
+    }
+
     public function create()
     {
         return view('admin.orders.create');
@@ -57,7 +56,7 @@ class OrderController extends Controller
             'email'        => 'nullable|email|max:255',
             'address'      => 'nullable|string|max:255',
             'total_amount' => 'required|numeric|min:0',
-            'status'       => 'required|string',
+            'status'       => 'required|in:Pending,Processing,Completed,Cancelled',
         ]);
 
         $customer = Customer::create([
@@ -69,7 +68,7 @@ class OrderController extends Controller
 
         Order::create([
             'customer_id'  => $customer->id,
-            'order_number' => 'ORD-' . date('YmdHis'),
+            'order_number' => 'ORD-' . now()->format('YmdHis'),
             'total_amount' => $request->total_amount,
             'status'       => $request->status,
         ]);
@@ -77,5 +76,15 @@ class OrderController extends Controller
         return redirect()
             ->route('admin.orders.index')
             ->with('success', 'Test order created successfully.');
+    }
+
+    public function invoice(Order $order)
+    {
+        $order->load([
+            'customer',
+            'items.product',
+        ]);
+
+        return view('admin.orders.invoice', compact('order'));
     }
 }

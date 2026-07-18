@@ -10,9 +10,20 @@
         </nav>
 
         {{-- Center Logo --}}
+        {{-- Center Logo --}}
+        @php
+            $setting = \App\Models\Setting::first();
+        @endphp
+
         <div class="header-logo">
             <a href="{{ route('home') }}">
-                Budlume
+                @if($setting && $setting->logo)
+                    <img src="{{ asset('uploads/settings/' . $setting->logo) }}"
+                         alt="{{ $setting->site_name ?? 'Budlume' }}"
+                         style="max-height: 60px; max-width: 220px;">
+                @else
+                    {{ $setting->site_name ?? 'Budlume' }}
+                @endif
             </a>
         </div>
 

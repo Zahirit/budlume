@@ -8,74 +8,38 @@
 
 <div class="card-box">
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2>Order Details</h2>
-
-        <a href="{{ route('admin.orders.index') }}"
-           class="btn btn-secondary">
-            Back
-        </a>
-    </div>
-
     @if(session('success'))
         <div class="alert alert-success">
             {{ session('success') }}
         </div>
     @endif
 
-    @if($errors->any())
-        <div class="alert alert-danger">
-            <ul class="mb-0">
-                @foreach($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
-    @endif
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+    <h2>Order #{{ $order->order_number }}</h2>
+
+    <div>
+        <a href="{{ route('admin.orders.invoice', $order) }}"
+           class="btn btn-success"
+           target="_blank">
+            🖨 Print Invoice
+        </a>
+
+        <a href="{{ route('admin.orders.index') }}"
+           class="btn btn-secondary">
+            ← Back
+        </a>
+    </div>
+
+</div>
 
     <div class="row">
 
-        <div class="col-md-6">
+        <!-- Customer Information -->
+        <div class="col-lg-6 mb-4">
 
-            <div class="card mb-4">
-                <div class="card-header">
-                    <strong>Order Information</strong>
-                </div>
-
-                <div class="card-body">
-
-                    <p>
-                        <strong>Order Number:</strong>
-                        {{ $order->order_number }}
-                    </p>
-
-                    <p>
-                        <strong>Total Amount:</strong>
-                        ${{ number_format($order->total_amount,2) }}
-                    </p>
-
-                    <p>
-                        <strong>Status:</strong>
-
-                        <span class="badge bg-info">
-                            {{ ucfirst($order->status) }}
-                        </span>
-                    </p>
-
-                    <p>
-                        <strong>Date:</strong>
-                        {{ $order->created_at->format('d M Y h:i A') }}
-                    </p>
-
-                </div>
-
-            </div>
-
-        </div>
-
-        <div class="col-md-6">
-
-            <div class="card mb-4">
+            <div class="card shadow-sm">
 
                 <div class="card-header">
                     <strong>Customer Information</strong>
@@ -83,30 +47,58 @@
 
                 <div class="card-body">
 
+                    <p><strong>Name:</strong> {{ $order->customer->name ?? 'N/A' }}</p>
+
+                    <p><strong>Email:</strong> {{ $order->customer->email ?? 'N/A' }}</p>
+
+                    <p><strong>Phone:</strong> {{ $order->customer->phone ?? 'N/A' }}</p>
+
+                    <p><strong>Address:</strong> {{ $order->customer->address ?? 'N/A' }}</p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- Order Information -->
+        <div class="col-lg-6 mb-4">
+
+            <div class="card shadow-sm">
+
+                <div class="card-header">
+                    <strong>Order Information</strong>
+                </div>
+
+                <div class="card-body">
+
+                    <p><strong>Order Number:</strong> {{ $order->order_number }}</p>
+
+                    <p><strong>Date:</strong> {{ $order->created_at->format('d M Y h:i A') }}</p>
+
                     <p>
-                        <strong>Name:</strong>
-                        {{ $order->customer->name ?? 'N/A' }}
+                        <strong>Status:</strong>
+
+                        @php
+                            $badge = match(strtolower($order->status)){
+                                'pending'=>'warning',
+                                'processing'=>'primary',
+                                'completed'=>'success',
+                                'cancelled'=>'danger',
+                                default=>'secondary'
+                            };
+                        @endphp
+
+                        <span class="badge bg-{{ $badge }}">
+                            {{ $order->status }}
+                        </span>
+
                     </p>
 
                     <p>
-                        <strong>Email:</strong>
-                        {{ $order->customer->email ?? 'N/A' }}
-                    </p>
+                        <strong>Total:</strong>
 
-                    <p>
-                        <strong>Phone:</strong>
-                        {{ $order->customer->phone ?? 'N/A' }}
-                    </p>
-
-                    <p>
-                        <strong>Address:</strong><br>
-
-                        {{ $order->customer->address ?? '' }}<br>
-
-                        {{ $order->customer->city ?? '' }}
-                        {{ $order->customer->state ?? '' }}
-                        {{ $order->customer->zip_code ?? '' }}
-
+                        ${{ number_format($order->total_amount,2) }}
                     </p>
 
                 </div>
@@ -117,44 +109,133 @@
 
     </div>
 
-    <div class="card mb-4">
+    <!-- Ordered Products -->
+
+    <div class="card shadow-sm mt-3">
 
         <div class="card-header">
+
+            <strong>Ordered Products</strong>
+
+        </div>
+
+        <div class="card-body p-0">
+
+            <table class="table table-bordered mb-0">
+
+                <thead>
+
+                    <tr>
+
+                        <th>Image</th>
+
+                        <th>Product</th>
+
+                        <th>Price</th>
+
+                        <th>Qty</th>
+
+                        <th>Subtotal</th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                @foreach($order->items as $item)
+
+                    <tr>
+
+                        <td width="80">
+
+                            @if($item->product && $item->product->featured_image)
+
+                                <img
+                                    src="{{ asset('uploads/products/'.$item->product->featured_image) }}"
+                                    width="60"
+                                    class="img-thumbnail">
+
+                            @endif
+
+                        </td>
+
+                        <td>
+
+                            {{ $item->product->name ?? 'Deleted Product' }}
+
+                        </td>
+
+                        <td>
+
+                            ${{ number_format($item->price,2) }}
+
+                        </td>
+
+                        <td>
+
+                            {{ $item->quantity }}
+
+                        </td>
+
+                        <td>
+
+                            ${{ number_format($item->price * $item->quantity,2) }}
+
+                        </td>
+
+                    </tr>
+
+                @endforeach
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+    <!-- Update Status -->
+
+    <div class="card shadow-sm mt-4">
+
+        <div class="card-header">
+
             <strong>Update Order Status</strong>
+
         </div>
 
         <div class="card-body">
 
-            <form action="{{ route('admin.orders.update', $order) }}"
-                  method="POST">
+            <form method="POST"
+                  action="{{ route('admin.orders.update',$order) }}">
 
                 @csrf
+
                 @method('PUT')
 
                 <div class="row">
 
                     <div class="col-md-4">
 
-                        <select name="status"
-                                class="form-select">
+                        <select
+                            name="status"
+                            class="form-select">
 
-                            <option value="Pending"
-                                {{ strtolower($order->status)=='pending' ? 'selected' : '' }}>
+                            <option {{ $order->status=='Pending'?'selected':'' }}>
                                 Pending
                             </option>
 
-                            <option value="Processing"
-                                {{ strtolower($order->status)=='processing' ? 'selected' : '' }}>
+                            <option {{ $order->status=='Processing'?'selected':'' }}>
                                 Processing
                             </option>
 
-                            <option value="Completed"
-                                {{ strtolower($order->status)=='completed' ? 'selected' : '' }}>
+                            <option {{ $order->status=='Completed'?'selected':'' }}>
                                 Completed
                             </option>
 
-                            <option value="Cancelled"
-                                {{ strtolower($order->status)=='cancelled' ? 'selected' : '' }}>
+                            <option {{ $order->status=='Cancelled'?'selected':'' }}>
                                 Cancelled
                             </option>
 
@@ -164,8 +245,7 @@
 
                     <div class="col-md-3">
 
-                        <button type="submit"
-                                class="btn btn-success">
+                        <button class="btn btn-success">
 
                             Update Status
 
@@ -180,101 +260,6 @@
         </div>
 
     </div>
-
-    <div class="card">
-
-        <div class="card-header">
-            <strong>Ordered Products</strong>
-        </div>
-
-        <div class="card-body">
-
-            <div class="table-responsive">
-
-                <table class="table table-bordered">
-
-                    <thead>
-
-                        <tr>
-
-                            <th>#</th>
-                            <th>Product</th>
-                            <th>Price</th>
-                            <th>Quantity</th>
-                            <th>Total</th>
-
-                        </tr>
-
-                    </thead>
-
-                    <tbody>
-
-                        @forelse($order->items as $item)
-
-                            <tr>
-
-                                <td>{{ $loop->iteration }}</td>
-
-                                <td>
-                                    {{ $item->product->name ?? 'Product Deleted' }}
-                                </td>
-
-                                <td>
-                                    ${{ number_format($item->price,2) }}
-                                </td>
-
-                                <td>
-                                    {{ $item->quantity }}
-                                </td>
-
-                                <td>
-                                    ${{ number_format($item->price * $item->quantity,2) }}
-                                </td>
-
-                            </tr>
-
-                        @empty
-
-                            <tr>
-
-                                <td colspan="5"
-                                    class="text-center">
-
-                                    No order items found.
-
-                                </td>
-
-                            </tr>
-
-                        @endforelse
-
-                    </tbody>
-
-                </table>
-
-            </div>
-
-        </div>
-
-    </div>
-
-    @if($order->notes)
-
-        <div class="card mt-4">
-
-            <div class="card-header">
-                <strong>Order Notes</strong>
-            </div>
-
-            <div class="card-body">
-
-                {{ $order->notes }}
-
-            </div>
-
-        </div>
-
-    @endif
 
 </div>
 
