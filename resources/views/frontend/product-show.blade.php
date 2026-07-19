@@ -1,6 +1,45 @@
 @extends('frontend.layouts.app')
 
-@section('title', $product->name . ' - Budlume')
+@section('title', $product->name . ' | Budlume')
+
+@section(
+    'meta_description',
+    \Illuminate\Support\Str::limit(
+        strip_tags(
+            $product->short_description
+            ?: $product->description
+            ?: 'Discover ' . $product->name . ' at Budlume.'
+        ),
+        155
+    )
+)
+
+@section('canonical', route('product.show', $product))
+
+@section('og_type', 'product')
+
+@section('og_title', $product->name . ' | Budlume')
+
+@section(
+    'og_description',
+    \Illuminate\Support\Str::limit(
+        strip_tags(
+            $product->short_description
+            ?: $product->description
+            ?: 'Discover ' . $product->name . ' at Budlume.'
+        ),
+        155
+    )
+)
+
+@if($product->featured_image)
+
+    @section(
+        'og_image',
+        asset('uploads/products/' . $product->featured_image)
+    )
+
+@endif
 
 @section('content')
 

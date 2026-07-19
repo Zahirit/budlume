@@ -24,51 +24,127 @@ class ProfileController extends Controller
     /**
      * Update the user's profile information.
      */
-        public function update(ProfileUpdateRequest $request): RedirectResponse
-        {
-            $user = $request->user();
+    public function update(ProfileUpdateRequest $request): RedirectResponse
+    {
+        $user = $request->user();
 
-            $user->fill($request->validated());
+        /*
+        |--------------------------------------------------------------------------
+        | 1. Store original email and phone
+        |--------------------------------------------------------------------------
+        | We need these values so verification is reset ONLY when
+        | the customer actually changes their email or phone number.
+        */
+        $oldEmail = $user->email;
+        $oldPhone = $user->phone;
 
-            if ($request->hasFile('profile_photo')) {
+        /*
+        |--------------------------------------------------------------------------
+        | 2. Update validated profile fields
+        |--------------------------------------------------------------------------
+        */
+        $validated = $request->validated();
 
-                $request->validate([
-                    'profile_photo' => ['image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
-                ]);
+        unset($validated['profile_photo']);
 
-                if ($user->profile_photo) {
-                    $oldPhoto = public_path('uploads/profile/' . $user->profile_photo);
+        $user->fill($validated);
 
-                    if (file_exists($oldPhoto)) {
-                        unlink($oldPhoto);
-                    }
+        /*
+        |--------------------------------------------------------------------------
+        | 3. Profile Photo Upload
+        |--------------------------------------------------------------------------
+        */
+        if ($request->hasFile('profile_photo')) {
+
+            /*
+             * Delete old profile photo.
+             */
+            if ($user->profile_photo) {
+
+                $oldPhoto = public_path(
+                    'uploads/profile/' . $user->profile_photo
+                );
+
+                if (file_exists($oldPhoto)) {
+                    unlink($oldPhoto);
                 }
-
-                $photo = $request->file('profile_photo');
-
-                $photoName = time() . '_' . uniqid() . '.' . $photo->getClientOriginalExtension();
-
-                $photo->move(public_path('uploads/profile'), $photoName);
-
-                $user->profile_photo = $photoName;
             }
 
-            if ($user->isDirty('email')) {
-                $user->email_verified_at = null;
+            /*
+             * Make sure upload directory exists.
+             */
+            $uploadPath = public_path('uploads/profile');
+
+            if (!file_exists($uploadPath)) {
+                mkdir($uploadPath, 0755, true);
             }
 
-            $user->save();
+            /*
+             * Upload new photo.
+             */
+            $photo = $request->file('profile_photo');
 
-            return Redirect::route('profile.edit')->with('status', 'profile-updated');
+            $photoName =
+                time() .
+                '_' .
+                uniqid() .
+                '.' .
+                $photo->getClientOriginalExtension();
+
+            $photo->move(
+                $uploadPath,
+                $photoName
+            );
+
+            $user->profile_photo = $photoName;
         }
+
+        /*
+        |--------------------------------------------------------------------------
+        | 4. Reset Email Verification If Email Changed
+        |--------------------------------------------------------------------------
+        */
+        if ($oldEmail !== $user->email) {
+            $user->email_verified_at = null;
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | 5. Reset Phone Verification If Phone Changed
+        |--------------------------------------------------------------------------
+        */
+        if ($oldPhone !== $user->phone) {
+            $user->phone_verified_at = null;
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | 6. Save User
+        |--------------------------------------------------------------------------
+        */
+        $user->save();
+
+        return Redirect::route('profile.edit')
+            ->with(
+                'status',
+                'profile-updated'
+            );
+    }
+
     /**
      * Delete the user's account.
      */
     public function destroy(Request $request): RedirectResponse
     {
-        $request->validateWithBag('userDeletion', [
-            'password' => ['required', 'current_password'],
-        ]);
+        $request->validateWithBag(
+            'userDeletion',
+            [
+                'password' => [
+                    'required',
+                    'current_password',
+                ],
+            ]
+        );
 
         $user = $request->user();
 
@@ -77,6 +153,7 @@ class ProfileController extends Controller
         $user->delete();
 
         $request->session()->invalidate();
+
         $request->session()->regenerateToken();
 
         return Redirect::to('/');

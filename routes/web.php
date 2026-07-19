@@ -12,6 +12,7 @@ use App\Http\Controllers\Admin\CustomerController;
 use App\Http\Controllers\OrderController;
 use App\Models\Product;
 use App\Http\Controllers\CartController;
+use App\Http\Controllers\User\DashboardController as UserDashboardController;
 
 
 Route::get('/', function () {
@@ -25,7 +26,7 @@ Route::get('/', function () {
 
 Route::prefix('admin')
     ->name('admin.')
-    ->middleware('auth')
+    ->middleware(['auth', 'role:admin'])
     ->group(function () {
 
         Route::get('/', function () {
@@ -43,38 +44,38 @@ Route::prefix('admin')
             ->name('products.gallery.delete');
 
         Route::patch('/orders/{order}/status', [AdminOrderController::class, 'update'])
-    ->name('orders.updateStatus');
+        ->name('orders.updateStatus');
 
-    Route::resource('contact-messages', ContactMessageController::class)
-    ->only(['index', 'show']);
+        Route::resource('contact-messages', ContactMessageController::class)
+        ->only(['index', 'show']);
 
-        Route::resource('orders', AdminOrderController::class)
-    ->only(['index', 'create', 'store', 'show', 'update']);
+            Route::resource('orders', AdminOrderController::class)
+        ->only(['index', 'create', 'store', 'show', 'update']);
 
-    Route::get('/orders/{order}/invoice', [AdminOrderController::class, 'invoice'])
-    ->name('orders.invoice');
+        Route::get('/orders/{order}/invoice', [AdminOrderController::class, 'invoice'])
+        ->name('orders.invoice');
 
         Route::get('/settings', [SettingController::class, 'index'])
          ->name('settings.index');
 
         Route::put('/settings', [SettingController::class, 'update'])
-    ->name('settings.update');
+        ->name('settings.update');
 
-        Route::resource('customers', CustomerController::class)
-    ->only(['index', 'show']);
-    });
+            Route::resource('customers', CustomerController::class)
+        ->only(['index', 'show']);
+        });
 
-Route::middleware('auth')->group(function () {
-    Route::get('/profile', [ProfileController::class, 'edit'])
-        ->name('profile.edit');
+        Route::middleware('auth')->group(function () {
+            Route::get('/profile', [ProfileController::class, 'edit'])
+                ->name('profile.edit');
 
-    Route::patch('/profile', [ProfileController::class, 'update'])
-        ->name('profile.update');
+        Route::patch('/profile', [ProfileController::class, 'update'])
+            ->name('profile.update');
 
-    Route::delete('/profile', [ProfileController::class, 'destroy'])
-        ->name('profile.destroy');
+        Route::delete('/profile', [ProfileController::class, 'destroy'])
+            ->name('profile.destroy');
 
-});
+       });
 
         Route::get('/shop', function () {
             $products = Product::where('status', 1)
@@ -86,7 +87,47 @@ Route::middleware('auth')->group(function () {
 
         Route::get('/product/{product}', function (Product $product) {
         return view('frontend.product-show', compact('product'));
-    })->name('product.show');
+        })->name('product.show');
+
+
+        Route::middleware(['auth'])->group(function () {
+
+        Route::get('/change-password', function () {
+            return view('user.change-password');
+        })->name('account.password');
+
+        });
+
+
+    // ========================================
+    // SEO - XML SITEMAP
+    // ========================================
+
+    Route::get('/sitemap.xml', function () {
+
+        $products = Product::where('status', 1)
+            ->latest('updated_at')
+            ->get();
+
+        return response()
+            ->view('frontend.sitemap', compact('products'))
+            ->header('Content-Type', 'application/xml');
+
+    })->name('sitemap');
+
+
+// ========================================
+// USER / CUSTOMER DASHBOARD
+// ========================================
+
+Route::middleware(['auth', 'role:customer'])->group(function () {
+
+    Route::get('/my-account', [UserDashboardController::class, 'index'])
+        ->name('account.dashboard');
+
+    });
+
+
 
         Route::get('/cart', [CartController::class, 'index'])
         ->name('cart.index');

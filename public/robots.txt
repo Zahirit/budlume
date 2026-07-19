@@ -1,2 +1,12 @@
 User-agent: *
-Disallow:
+Allow: /
+
+Disallow: /admin/
+Disallow: /login
+Disallow: /register
+Disallow: /cart
+Disallow: /checkout
+Disallow: /profile
+
+# Add the production sitemap URL when the site goes live.
+# Sitemap: https://your-domain.com/sitemap.xml

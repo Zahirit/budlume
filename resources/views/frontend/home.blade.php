@@ -5,14 +5,43 @@
 @section('content')
 
 <section class="hero-section">
-    <img src="{{ asset('uploads/frontend/w-hemp-slider-3-opt-1536x816.jpg') }}"
-         alt="Budlume"
+
+    <img src="{{ asset('uploads/frontend/budlume-hero-bright.png') }}"
+         alt="Budlume Premium Cannabis Products"
          class="hero-image">
+
+    <div class="hero-overlay">
+        <div class="hero-content">
+
+            <div class="hero-small-title">
+                Natural • Premium • Quality
+            </div>
+
+            <h1>
+                Premium Cannabis<br>
+                For A Better You
+            </h1>
+
+            <p>
+                Discover premium quality cannabis products<br>
+                crafted for your wellness and relaxation.
+            </p>
+
+            <a href="{{ route('shop') }}" class="hero-shop-btn">
+                SHOP NOW <span>→</span>
+            </a>
+
+        </div>
+    </div>
+
 </section>
 <section class="home-feature-section">
     <div class="home-feature-image">
-        <img src="{{ asset('uploads/frontend/closeup-colorful-cannabis-buds-with-purple-orange-hues_252967-10529.jpg') }}"
-             alt="Premium Cannabis">
+         <img
+        src="{{ asset('uploads/frontend/budlume-hero-bright.png') }}"
+        alt="Budlume"
+        class="hero-image"
+    >
     </div>
 
     <div class="home-feature-content">

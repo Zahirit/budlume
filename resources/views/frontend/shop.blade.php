@@ -1,53 +1,157 @@
 @extends('frontend.layouts.app')
 
-@section('title', 'Shop - Budlume')
+@section('title', 'Shop Premium Products | Budlume')
+
+@section(
+    'meta_description',
+    'Shop the Budlume collection of premium products. Explore our carefully selected range and discover quality products online.'
+)
+
+@section('canonical', route('shop'))
+
+@section('og_title', 'Shop Premium Products | Budlume')
+
+@section(
+    'og_description',
+    'Explore the Budlume collection of carefully selected premium products.'
+)
+
+@section(
+    'og_image',
+    asset('uploads/frontend/budlume-hero-bright.png')
+)
 
 @section('content')
 
-<section class="home-products-section">
+<section class="shop-section">
 
-    <div class="home-products-heading">
-        <h2>SHOP</h2>
+    {{-- Shop Heading --}}
+    <div class="shop-heading">
+
+        <div class="shop-small-title">
+            <span>—</span>
+            🌿 OUR COLLECTION
+            <span>—</span>
+        </div>
+
+        <h1>Shop Premium Products</h1>
+
+        <p>
+            Discover our carefully selected collection of premium products.
+        </p>
+
     </div>
 
-    <div class="home-products-grid">
+
+    {{-- Product Grid --}}
+    <div class="shop-products-grid">
+
         @forelse($products as $product)
 
-            <div class="home-product-card">
+            <article class="shop-product-card">
 
-                <a href="{{ route('product.show', $product) }}">
-                <div class="home-product-image">
-                    @if($product->featured_image)
-                        <img src="{{ asset('uploads/products/' . $product->featured_image) }}"
-                             alt="{{ $product->name }}">
-                    @endif
-                </div>
-            </a>
+                {{-- Product Image --}}
+                <div class="shop-product-image">
 
-              <h5 class="product-name">
-                    <a href="{{ route('product.show', $product) }}" class="product-title-link">
-                        {{ $product->name }}
-                    </a>
-                </h5>
-
-                <div class="home-product-price">
                     @if($product->sale_price)
-                        <span class="old-price">
-                            ${{ number_format($product->price, 2) }}
+                        <span class="shop-sale-badge">
+                            SALE
                         </span>
-                        <span>
-                            ${{ number_format($product->sale_price, 2) }}
-                        </span>
-                    @else
-                        <span>${{ number_format($product->price, 2) }}</span>
                     @endif
+
+                    <a href="{{ route('product.show', $product) }}">
+
+                        @if($product->featured_image)
+
+                            <img
+                                src="{{ asset('uploads/products/' . $product->featured_image) }}"
+                                alt="{{ $product->name }}"
+                                loading="lazy"
+                            >
+
+                        @else
+
+                            <div class="shop-no-image">
+                                No Image
+                            </div>
+
+                        @endif
+
+                    </a>
+
+                    {{-- Hover Button --}}
+                    <div class="shop-product-action">
+
+                        <a href="{{ route('product.show', $product) }}"
+                           class="shop-view-btn">
+
+                            VIEW PRODUCT
+
+                        </a>
+
+                    </div>
+
                 </div>
+
+
+                {{-- Product Information --}}
+                <div class="shop-product-info">
+
+                    <h2 class="shop-product-name">
+
+                        <a href="{{ route('product.show', $product) }}">
+
+                            {{ $product->name }}
+
+                        </a>
+
+                    </h2>
+
+
+                    <div class="shop-product-price">
+
+                        @if($product->sale_price)
+
+                            <span class="shop-old-price">
+
+                                ${{ number_format($product->price, 2) }}
+
+                            </span>
+
+                            <span class="shop-sale-price">
+
+                                ${{ number_format($product->sale_price, 2) }}
+
+                            </span>
+
+                        @else
+
+                            <span class="shop-regular-price">
+
+                                ${{ number_format($product->price, 2) }}
+
+                            </span>
+
+                        @endif
+
+                    </div>
+
+                </div>
+
+            </article>
+
+        @empty
+
+            <div class="shop-empty">
+
+                <h3>No products available.</h3>
+
+                <p>Please check back soon for new products.</p>
 
             </div>
 
-        @empty
-            <p>No products available.</p>
         @endforelse
+
     </div>
 
 </section>
