@@ -95,31 +95,81 @@
 
 </div>
 
-<hr>
+   <hr>
 
-<h3>Customer Information</h3>
+        <h3>Customer Information</h3>
 
-<p>
+        <p>
 
-<strong>Name:</strong>
-{{ $order->customer->name ?? '' }}
+            <strong>Customer Type:</strong>
 
-<br>
+            @if($order->customer_type === 'guest')
+                <span class="guest-badge">Guest</span>
+            @else
+                <span class="registered-badge">Registered</span>
+            @endif
 
-<strong>Email:</strong>
-{{ $order->customer->email ?? '' }}
+            <br><br>
 
-<br>
+            <strong>Name:</strong>
+            {{ $order->customer_name
+                ?: optional($order->customer)->name
+                ?: 'N/A' }}
 
-<strong>Phone:</strong>
-{{ $order->customer->phone ?? '' }}
+            <br>
 
-<br>
+            <strong>Email:</strong>
+            {{ $order->customer_email
+                ?: optional($order->customer)->email
+                ?: 'N/A' }}
 
-<strong>Address:</strong>
-{{ $order->customer->address ?? '' }}
+            <br>
 
-</p>
+            <strong>Phone:</strong>
+            {{ $order->customer_phone
+                ?: optional($order->customer)->phone
+                ?: 'N/A' }}
+
+            <br>
+
+            <strong>Mobile Verified:</strong>
+            {{ $order->phone_verified_at ? 'Yes' : 'No' }}
+
+        </p>
+
+        <h3>Delivery Address</h3>
+
+        <p>
+            @if($order->delivery_address_line_1)
+
+                {{ $order->delivery_address_line_1 }}<br>
+
+                @if($order->delivery_address_line_2)
+                    {{ $order->delivery_address_line_2 }}<br>
+                @endif
+
+                @if($order->delivery_city)
+                    {{ $order->delivery_city }}
+                @endif
+
+                @if($order->delivery_state)
+                    , {{ $order->delivery_state }}
+                @endif
+
+                @if($order->delivery_postal_code)
+                    {{ $order->delivery_postal_code }}
+                @endif
+
+                <br>
+
+                {{ $order->delivery_country }}
+
+            @else
+
+                {{ optional($order->customer)->address ?: 'N/A' }}
+
+            @endif
+        </p>
 
 <table>
 

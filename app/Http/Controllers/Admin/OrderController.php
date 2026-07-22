@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Customer;
 use App\Models\Order;
 use Illuminate\Http\Request;
+use App\Mail\InvoiceMail;
+use Illuminate\Support\Facades\Mail;
 
 class OrderController extends Controller
 {
@@ -78,13 +80,64 @@ class OrderController extends Controller
             ->with('success', 'Test order created successfully.');
     }
 
-    public function invoice(Order $order)
-    {
-        $order->load([
-            'customer',
-            'items.product',
-        ]);
 
-        return view('admin.orders.invoice', compact('order'));
+public function invoice(Order $order)
+{
+    $order->load([
+        'customer',
+        'items.product',
+    ]);
+
+    return view('admin.orders.invoice', compact('order'));
+}
+
+/**
+ * Send invoice email to Guest or Registered customer.
+ */
+public function sendInvoice(Order $order)
+{
+    $order->load([
+        'customer',
+        'items.product',
+    ]);
+
+    /*
+    |--------------------------------------------------------------------------
+    | Find Customer Email
+    |--------------------------------------------------------------------------
+    | Guest order      = orders.customer_email
+    | Registered order = customers.email
+    */
+    $email = $order->customer_email
+        ?: optional($order->customer)->email;
+
+    if (!$email) {
+        return back()->with(
+            'error',
+            'Customer email address was not found.'
+        );
     }
+
+    try {
+
+        Mail::to($email)->send(
+            new InvoiceMail($order)
+        );
+
+        return back()->with(
+            'success',
+            'Invoice successfully sent to ' . $email
+        );
+
+    } catch (\Throwable $e) {
+
+        report($e);
+
+        return back()->with(
+            'error',
+            'Invoice could not be sent. Please check your mail configuration.'
+        );
+    }
+}
+
 }

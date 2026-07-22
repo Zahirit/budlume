@@ -13,6 +13,9 @@ use App\Http\Controllers\OrderController;
 use App\Models\Product;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\User\DashboardController as UserDashboardController;
+use App\Http\Controllers\Auth\EmailOtpController;
+use App\Http\Controllers\Auth\PhoneOtpController;
+use App\Http\Controllers\GuestPhoneOtpController;
 
 
 Route::get('/', function () {
@@ -54,6 +57,9 @@ Route::prefix('admin')
 
         Route::get('/orders/{order}/invoice', [AdminOrderController::class, 'invoice'])
         ->name('orders.invoice');
+
+        Route::post('/orders/{order}/send-invoice', [AdminOrderController::class, 'sendInvoice'])
+        ->name('orders.sendInvoice');
 
         Route::get('/settings', [SettingController::class, 'index'])
          ->name('settings.index');
@@ -142,6 +148,7 @@ Route::middleware(['auth', 'role:customer'])->group(function () {
         ->name('cart.remove');
 
         Route::get('/checkout', function () {
+
             $cart = session()->get('cart', []);
 
             if (empty($cart)) {
@@ -149,11 +156,72 @@ Route::middleware(['auth', 'role:customer'])->group(function () {
             }
 
             return view('frontend.checkout', compact('cart'));
-        })->middleware('auth')->name('checkout');
+
+             })->name('checkout');
+
 
         Route::post('/checkout', [CheckoutController::class, 'store'])
-            ->middleware('auth')
             ->name('checkout.store');
+
+            // ========================================
+            // GUEST CHECKOUT - MOBILE OTP
+            // ========================================
+
+            // Show Guest OTP verification page
+            Route::get(
+                '/guest/phone/verify-otp',
+                [GuestPhoneOtpController::class, 'show']
+            )->name('guest.phone.otp.show');
+
+
+            // Send / resend Guest OTP
+            Route::post(
+                '/guest/phone/send-otp',
+                [GuestPhoneOtpController::class, 'send']
+            )
+                ->middleware('throttle:3,1')
+                ->name('guest.phone.otp.send');
+
+
+            // Verify Guest OTP and create order
+            Route::post(
+                '/guest/phone/verify-otp',
+                [GuestPhoneOtpController::class, 'verify']
+            )
+                ->middleware('throttle:6,1')
+                ->name('guest.phone.otp.verify');
+
+
+            // Guest Order Success
+            Route::get(
+                '/guest/order-success/{token}',
+                function ($token) {
+
+                    $order = \App\Models\Order::where(
+                        'tracking_token',
+                        $token
+                    )
+                        ->where('customer_type', 'guest')
+                        ->firstOrFail();
+
+                    /*
+                     * Only allow the order that was just completed
+                     * in this browser session.
+                     */
+                    if (
+                        session('guest_completed_order_id')
+                        != $order->id
+                    ) {
+                        abort(403);
+                    }
+
+                    return view(
+                        'frontend.order-success',
+                        compact('order')
+                    );
+
+                }
+            )->name('guest.order.success');
 
             Route::get('/order-success/{order}', function (\App\Models\Order $order) {
                 return view('frontend.order-success', compact('order'));
@@ -166,6 +234,50 @@ Route::middleware(['auth', 'role:customer'])->group(function () {
 
             Route::get('/my-orders/{order}', [OrderController::class, 'show'])
                 ->name('orders.show');
+
+            });
+
+            // ========================================
+            // EMAIL OTP VERIFICATION
+            // ========================================
+
+            Route::middleware('auth')->group(function () {
+
+                // Show OTP verification page
+                Route::get('/email/verify-otp', [EmailOtpController::class, 'show'])
+                    ->name('email.otp.show');
+
+                // Send / resend OTP
+                Route::post('/email/send-otp', [EmailOtpController::class, 'send'])
+                    ->middleware('throttle:3,1')
+                    ->name('email.otp.send');
+
+                // Verify OTP
+                Route::post('/email/verify-otp', [EmailOtpController::class, 'verify'])
+                    ->middleware('throttle:6,1')
+                    ->name('email.otp.verify');
+
+            });
+
+            // ========================================
+            // PHONE OTP VERIFICATION
+            // ========================================
+
+            Route::middleware('auth')->group(function () {
+
+                // Show phone verification page
+                Route::get('/phone/verify-otp', [PhoneOtpController::class, 'show'])
+                    ->name('phone.otp.show');
+
+                // Send / resend phone OTP
+                Route::post('/phone/send-otp', [PhoneOtpController::class, 'send'])
+                ->middleware('throttle:20,1')
+                ->name('phone.otp.send');
+
+                // Verify phone OTP
+                Route::post('/phone/verify-otp', [PhoneOtpController::class, 'verify'])
+                    ->middleware('throttle:6,1')
+                    ->name('phone.otp.verify');
 
             });
 

@@ -40,8 +40,23 @@
                     <tr>
                         <td>{{ $order->id }}</td>
                         <td>{{ $order->order_number }}</td>
-                        <td>{{ $order->customer->name ?? 'N/A' }}</td>
-                        <td>{{ $order->customer->phone ?? 'N/A' }}</td>
+                        <td>
+                            {{ $order->customer_name
+                                ?: optional($order->customer)->name
+                                ?: 'N/A' }}
+
+                            @if($order->customer_type === 'guest')
+                                <span class="badge bg-warning text-dark ms-1">
+                                    Guest
+                                </span>
+                            @endif
+                        </td>
+
+                        <td>
+                            {{ $order->customer_phone
+                                ?: optional($order->customer)->phone
+                                ?: 'N/A' }}
+                        </td>
                         <td>${{ number_format($order->total_amount, 2) }}</td>
 
                         <td>

@@ -35,7 +35,6 @@ class ProfileController extends Controller
         | We need these values so verification is reset ONLY when
         | the customer actually changes their email or phone number.
         */
-        $oldEmail = $user->email;
         $oldPhone = $user->phone;
 
         /*
@@ -101,35 +100,73 @@ class ProfileController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | 4. Reset Email Verification If Email Changed
-        |--------------------------------------------------------------------------
-        */
-        if ($oldEmail !== $user->email) {
-            $user->email_verified_at = null;
-        }
-
-        /*
-        |--------------------------------------------------------------------------
         | 5. Reset Phone Verification If Phone Changed
         |--------------------------------------------------------------------------
         */
-        if ($oldPhone !== $user->phone) {
-            $user->phone_verified_at = null;
-        }
-
+       
         /*
-        |--------------------------------------------------------------------------
-        | 6. Save User
-        |--------------------------------------------------------------------------
-        */
-        $user->save();
+            |--------------------------------------------------------------------------
+            | 4. Check If Phone Number Changed
+            |--------------------------------------------------------------------------
+            */
+            $phoneChanged = $oldPhone !== $user->phone;
 
-        return Redirect::route('profile.edit')
-            ->with(
-                'status',
-                'profile-updated'
-            );
-    }
+            if ($phoneChanged) {
+
+                // New phone number must be verified again.
+                $user->phone_verified_at = null;
+
+                // Generate new secure 6-digit OTP.
+                $otp = (string) random_int(100000, 999999);
+
+                $user->phone_otp = $otp;
+                $user->phone_otp_expires_at = now()->addMinutes(10);
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | 5. Save User
+            |--------------------------------------------------------------------------
+            */
+            $user->save();
+
+            /*
+            |--------------------------------------------------------------------------
+            | 6. If Phone Changed, Redirect To OTP Verification
+            |--------------------------------------------------------------------------
+            */
+            if ($phoneChanged) {
+
+                // LOCAL TESTING ONLY.
+                // Later this OTP will be sent using our SMS provider.
+                \Illuminate\Support\Facades\Log::info(
+                    'Budlume Profile Phone OTP',
+                    [
+                        'user_id' => $user->id,
+                        'phone' => $user->phone,
+                        'otp' => $otp,
+                    ]
+                );
+
+                return Redirect::route('phone.otp.show')
+                    ->with(
+                        'success',
+                        'Your mobile number has changed. Please verify your new mobile number.'
+                    );
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | 7. Normal Profile Update
+            |--------------------------------------------------------------------------
+            */
+            return Redirect::route('profile.edit')
+                ->with(
+                    'status',
+                    'profile-updated'
+                );
+
+            }
 
     /**
      * Delete the user's account.

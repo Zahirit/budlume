@@ -20,6 +20,17 @@
     <h2>Order #{{ $order->order_number }}</h2>
 
     <div>
+        <form action="{{ route('admin.orders.sendInvoice', $order) }}"
+              method="POST"
+              class="d-inline"
+              style="margin:0;">
+            @csrf
+
+            <button type="submit" class="btn btn-primary">
+                ✉ Send Invoice Email
+            </button>
+        </form>
+        
         <a href="{{ route('admin.orders.invoice', $order) }}"
            class="btn btn-success"
            target="_blank">
@@ -36,30 +47,144 @@
 
     <div class="row">
 
-        <!-- Customer Information -->
-        <div class="col-lg-6 mb-4">
 
-            <div class="card shadow-sm">
+            <!-- Customer Information -->
+            <div class="col-lg-6 mb-4">
 
-                <div class="card-header">
-                    <strong>Customer Information</strong>
-                </div>
+                <div class="card shadow-sm">
 
-                <div class="card-body">
+                    <div class="card-header">
+                        <strong>Customer Information</strong>
+                    </div>
 
-                    <p><strong>Name:</strong> {{ $order->customer->name ?? 'N/A' }}</p>
+                    <div class="card-body">
 
-                    <p><strong>Email:</strong> {{ $order->customer->email ?? 'N/A' }}</p>
+                        @php
+                            // New checkout snapshot data first.
+                            // Fall back to old customer relationship
+                            // for previous registered orders.
 
-                    <p><strong>Phone:</strong> {{ $order->customer->phone ?? 'N/A' }}</p>
+                            $displayName = $order->customer_name
+                                ?: optional($order->customer)->name;
 
-                    <p><strong>Address:</strong> {{ $order->customer->address ?? 'N/A' }}</p>
+                            $displayEmail = $order->customer_email
+                                ?: optional($order->customer)->email;
+
+                            $displayPhone = $order->customer_phone
+                                ?: optional($order->customer)->phone;
+
+                            $oldAddress = optional($order->customer)->address;
+                        @endphp
+
+
+                        <p>
+                            <strong>Customer Type:</strong>
+
+                            @if($order->customer_type === 'guest')
+
+                                <span class="badge bg-warning text-dark">
+                                    Guest
+                                </span>
+
+                            @else
+
+                                <span class="badge bg-success">
+                                    Registered
+                                </span>
+
+                            @endif
+                        </p>
+
+
+                        <p>
+                            <strong>Name:</strong>
+                            {{ $displayName ?: 'N/A' }}
+                        </p>
+
+
+                        <p>
+                            <strong>Email:</strong>
+                            {{ $displayEmail ?: 'N/A' }}
+                        </p>
+
+
+                        <p>
+                            <strong>Phone:</strong>
+                            {{ $displayPhone ?: 'N/A' }}
+                        </p>
+
+
+                        <p>
+                            <strong>Mobile Verified:</strong>
+
+                            @if($order->phone_verified_at)
+
+                                <span class="badge bg-success">
+                                    Yes
+                                </span>
+
+                            @else
+
+                                <span class="badge bg-secondary">
+                                    No
+                                </span>
+
+                            @endif
+                        </p>
+
+
+                        <hr>
+
+
+                        <p class="mb-1">
+                            <strong>Delivery Address:</strong>
+                        </p>
+
+
+                        @if($order->delivery_address_line_1)
+
+                            <div>
+
+                                {{ $order->delivery_address_line_1 }}
+
+                                @if($order->delivery_address_line_2)
+                                    <br>
+                                    {{ $order->delivery_address_line_2 }}
+                                @endif
+
+                                @if($order->delivery_city)
+                                    <br>
+                                    {{ $order->delivery_city }}
+                                @endif
+
+                                @if($order->delivery_state)
+                                    , {{ $order->delivery_state }}
+                                @endif
+
+                                @if($order->delivery_postal_code)
+                                    {{ $order->delivery_postal_code }}
+                                @endif
+
+                                @if($order->delivery_country)
+                                    <br>
+                                    {{ $order->delivery_country }}
+                                @endif
+
+                            </div>
+
+                        @else
+
+                            <p>
+                                {{ $oldAddress ?: 'N/A' }}
+                            </p>
+
+                        @endif
+
+                    </div>
 
                 </div>
 
             </div>
-
-        </div>
 
         <!-- Order Information -->
         <div class="col-lg-6 mb-4">
