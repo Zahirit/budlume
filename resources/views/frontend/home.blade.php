@@ -27,9 +27,18 @@
                 crafted for your wellness and relaxation.
             </p>
 
+           <div class="hero-buttons">
+
             <a href="{{ route('shop') }}" class="hero-shop-btn">
                 SHOP NOW <span>→</span>
             </a>
+
+            <a href="{{ route('delivery.register') }}"
+               class="hero-delivery-btn">
+                BECOME A DELIVERY PARTNER
+            </a>
+
+        </div>
 
         </div>
     </div>

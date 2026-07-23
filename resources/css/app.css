@@ -3256,3 +3256,48 @@ body {
     font-size:12px;
     font-weight:bold;
 }
+.hero-buttons {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+}
+
+.hero-delivery-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 48px;
+    padding: 0 24px;
+
+    border: 1px solid #ffffff;
+    border-radius: 3px;
+
+    background: transparent;
+    color: #ffffff;
+
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.7px;
+    text-decoration: none;
+
+    transition: all 0.25s ease;
+}
+
+.hero-delivery-btn:hover {
+    background: #ffffff;
+    color: #111111;
+}
+
+@media (max-width: 600px) {
+    .hero-buttons {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .hero-delivery-btn {
+        width: 100%;
+        max-width: 280px;
+    }
+}
+

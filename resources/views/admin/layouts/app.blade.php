@@ -144,6 +144,12 @@
                     <span>Contact Messages</span>
                 </a>
 
+
+                <a href="{{ route('admin.delivery-men.index') }}"
+                   class="{{ request()->routeIs('admin.delivery-men.*') ? 'active' : '' }}">
+                    🚚 Delivery Partner
+                </a>
+
            <a href="{{ route('admin.settings.index') }}"
                class="nav-link {{ request()->routeIs('admin.settings.*') ? 'active' : '' }}">
                 <i class="bi bi-gear"></i>
@@ -261,6 +267,8 @@ beginAtZero:true
 }
 
 </script>
+
+@stack('scripts')
 
 </body>
 </html>

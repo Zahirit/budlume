@@ -16,5 +16,15 @@ class Setting extends Model
         'facebook',
         'instagram',
         'twitter',
+        'store_latitude',
+        'store_longitude',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'store_latitude' => 'decimal:7',
+            'store_longitude' => 'decimal:7',
+        ];
+    }
 }

@@ -16,6 +16,13 @@ use App\Http\Controllers\User\DashboardController as UserDashboardController;
 use App\Http\Controllers\Auth\EmailOtpController;
 use App\Http\Controllers\Auth\PhoneOtpController;
 use App\Http\Controllers\GuestPhoneOtpController;
+use App\Http\Controllers\Delivery\Auth\DeliveryRegisterController;
+use App\Http\Controllers\Delivery\Auth\DeliveryPhoneOtpController;
+use App\Http\Controllers\Admin\DeliveryManController;
+use App\Http\Controllers\Delivery\DashboardController as DeliveryDashboardController;
+use App\Http\Controllers\Delivery\LocationController;
+use App\Http\Controllers\Delivery\DeliveryOfferController;
+
 
 
 Route::get('/', function () {
@@ -25,12 +32,114 @@ Route::get('/', function () {
         ->get();
 
     return view('frontend.home', compact('products'));
-})->name('home');
+    })->name('home');
 
-Route::prefix('admin')
-    ->name('admin.')
-    ->middleware(['auth', 'role:admin'])
-    ->group(function () {
+    /*
+    |--------------------------------------------------------------------------
+    | Delivery Man Registration
+    |--------------------------------------------------------------------------
+    */
+
+    Route::middleware('guest')->group(function () {
+
+        Route::get(
+            '/delivery/register',
+            [DeliveryRegisterController::class, 'create']
+        )->name('delivery.register');
+
+        Route::post(
+            '/delivery/register',
+            [DeliveryRegisterController::class, 'store']
+        )->name('delivery.register.store');
+
+    });
+
+
+            /*
+        |--------------------------------------------------------------------------
+        | Delivery Man Mobile OTP Verification
+        |--------------------------------------------------------------------------
+        */
+
+       Route::middleware('guest')->group(function () {
+
+            Route::get(
+                '/delivery/verify-phone',
+                [DeliveryPhoneOtpController::class, 'show']
+            )->name('delivery.phone.otp.show');
+
+            Route::post(
+                '/delivery/send-phone-otp',
+                [DeliveryPhoneOtpController::class, 'send']
+            )
+                ->middleware('throttle:3,1')
+                ->name('delivery.phone.otp.send');
+
+            Route::post(
+                '/delivery/verify-phone',
+                [DeliveryPhoneOtpController::class, 'verify']
+            )
+                ->middleware('throttle:6,1')
+                ->name('delivery.phone.otp.verify');
+
+        });
+
+       /*
+        |--------------------------------------------------------------------------
+        | Delivery Man Pending Approval
+        |--------------------------------------------------------------------------
+        */
+
+        Route::get('/delivery/pending', function () {
+            return view('delivery.auth.pending');
+        })->name('delivery.pending');
+
+        /*
+        |--------------------------------------------------------------------------
+        | Delivery Partner Dashboard + Live Location
+        |--------------------------------------------------------------------------
+        */
+
+        Route::middleware(['auth', 'role:delivery'])->group(function () {
+
+            // Delivery Dashboard
+            Route::get(
+                '/delivery/dashboard',
+                [DeliveryDashboardController::class, 'index']
+            )->name('delivery.dashboard');
+
+            // Update GPS location / mark delivery man online
+            Route::post(
+                '/delivery/location',
+                [LocationController::class, 'update']
+            )->name('delivery.location.update');
+
+            // Mark delivery man offline
+            Route::post(
+                '/delivery/offline',
+                [LocationController::class, 'offline']
+            )->name('delivery.location.offline');
+
+            // Accept delivery offer
+            Route::post(
+                '/delivery/offers/{offer}/accept',
+                [DeliveryOfferController::class, 'accept']
+            )->name('delivery.offers.accept');
+
+            // Reject delivery offer
+            Route::post(
+                '/delivery/offers/{offer}/reject',
+                [DeliveryOfferController::class, 'reject']
+            )->name('delivery.offers.reject');
+
+
+        });
+
+        Route::prefix('admin')
+
+        ->name('admin.')
+        ->middleware(['auth', 'role:admin'])
+        ->group(function () {
 
         Route::get('/', function () {
             return redirect()->route('admin.dashboard');
@@ -69,6 +178,25 @@ Route::prefix('admin')
 
             Route::resource('customers', CustomerController::class)
         ->only(['index', 'show']);
+
+        /*
+        |--------------------------------------------------------------------------
+        | Admin Delivery Man Management
+        |--------------------------------------------------------------------------
+        */
+
+        Route::get('/delivery-men', [DeliveryManController::class, 'index'])
+            ->name('delivery-men.index');
+
+        Route::get('/delivery-men/{deliveryMan}', [DeliveryManController::class, 'show'])
+            ->name('delivery-men.show');
+
+        Route::patch('/delivery-men/{deliveryMan}/approve', [DeliveryManController::class, 'approve'])
+            ->name('delivery-men.approve');
+
+        Route::patch('/delivery-men/{deliveryMan}/reject', [DeliveryManController::class, 'reject'])
+            ->name('delivery-men.reject');
+
         });
 
         Route::middleware('auth')->group(function () {

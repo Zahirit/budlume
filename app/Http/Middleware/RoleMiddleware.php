@@ -11,25 +11,41 @@ class RoleMiddleware
     /**
      * Handle an incoming request.
      */
-    public function handle(Request $request, Closure $next, string $role): Response
+    public function handle(
+        Request $request,
+        Closure $next,
+        string $role
+    ): Response
     {
         // User must be logged in
         if (!$request->user()) {
             return redirect()->route('login');
         }
 
-        // Check required role
-        if ($request->user()->role !== $role) {
-
-            // Admin should go to Admin Dashboard
-            if ($request->user()->role === 'admin') {
-                return redirect()->route('admin.dashboard');
-            }
-
-            // Customer should go to Customer Dashboard
-            return redirect()->route('account.dashboard');
+        // Correct role - allow request
+        if ($request->user()->role === $role) {
+            return $next($request);
         }
 
-        return $next($request);
+        /*
+        |--------------------------------------------------------------------------
+        | Wrong dashboard - redirect user to their own dashboard
+        |--------------------------------------------------------------------------
+        */
+
+        return match ($request->user()->role) {
+
+            'admin' => redirect()
+                ->route('admin.dashboard'),
+
+            'delivery' => redirect()
+                ->route('delivery.dashboard'),
+
+            'customer' => redirect()
+                ->route('account.dashboard'),
+
+            default => redirect()
+                ->route('home'),
+        };
     }
 }

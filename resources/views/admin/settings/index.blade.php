@@ -130,6 +130,85 @@
 
         </div>
 
+
+        {{-- Store Location --}}
+<div class="card shadow-sm mb-4">
+
+    <div class="card-header">
+        <strong>📍 Store Location</strong>
+    </div>
+
+    <div class="card-body">
+
+        <p class="text-muted mb-3">
+            These coordinates are used to find the nearest available
+            delivery partner when assigning an order.
+        </p>
+
+        <div class="row">
+
+            <div class="col-md-6 mb-3">
+
+                <label class="form-label">
+                    Store Latitude
+                </label>
+
+                <input type="number"
+                       step="0.0000001"
+                       min="-90"
+                       max="90"
+                       name="store_latitude"
+                       id="store_latitude"
+                       class="form-control"
+                       placeholder="Example: 23.7833650"
+                       value="{{ old(
+                           'store_latitude',
+                           $setting->store_latitude ?? ''
+                       ) }}">
+
+            </div>
+
+            <div class="col-md-6 mb-3">
+
+                <label class="form-label">
+                    Store Longitude
+                </label>
+
+                <input type="number"
+                       step="0.0000001"
+                       min="-180"
+                       max="180"
+                       name="store_longitude"
+                       id="store_longitude"
+                       class="form-control"
+                       placeholder="Example: 90.4177930"
+                       value="{{ old(
+                           'store_longitude',
+                           $setting->store_longitude ?? ''
+                       ) }}">
+
+            </div>
+
+        </div>
+
+        <button type="button"
+                class="btn btn-outline-secondary"
+                id="use-store-location">
+
+            📍 Use Current Location
+
+        </button>
+
+        <small id="store-location-message"
+               class="d-block mt-2 text-muted">
+            You can enter the store coordinates manually or use
+            this device's current GPS location.
+        </small>
+
+            </div>
+
+        </div>
+
         {{-- Footer --}}
         <div class="card shadow-sm mb-4">
 
@@ -204,3 +283,78 @@
 </div>
 
 @endsection
+
+@push('scripts')
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    const button =
+        document.getElementById('use-store-location');
+
+    const latitude =
+        document.getElementById('store_latitude');
+
+    const longitude =
+        document.getElementById('store_longitude');
+
+    const message =
+        document.getElementById('store-location-message');
+
+    if (!button) {
+        return;
+    }
+
+    button.addEventListener('click', function () {
+
+        if (!navigator.geolocation) {
+
+            message.textContent =
+                'Geolocation is not supported by this browser.';
+
+            return;
+        }
+
+        button.disabled = true;
+
+        message.textContent =
+            'Getting current store location...';
+
+        navigator.geolocation.getCurrentPosition(
+
+            function (position) {
+
+                latitude.value =
+                    position.coords.latitude.toFixed(7);
+
+                longitude.value =
+                    position.coords.longitude.toFixed(7);
+
+                message.textContent =
+                    '✓ Store location detected successfully.';
+
+                button.disabled = false;
+            },
+
+            function (error) {
+
+                message.textContent =
+                    'Could not get location. Please allow location permission or enter coordinates manually.';
+
+                button.disabled = false;
+            },
+
+            {
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 0
+            }
+
+        );
+
+    });
+
+});
+</script>
+
+@endpush

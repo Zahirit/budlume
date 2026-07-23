@@ -6,8 +6,10 @@ use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+
 
 #[Fillable([
     'name',
@@ -53,5 +55,42 @@ protected function casts(): array
         'password' => 'hashed',
     ];
 }
+
+
+/**
+ * Check if the user is an administrator.
+ */
+public function isAdmin(): bool
+{
+    return $this->role === 'admin';
+}
+
+/**
+ * Check if the user is a customer.
+ */
+public function isCustomer(): bool
+{
+    return $this->role === 'customer';
+}
+
+/**
+ * Check if the user is a delivery man.
+ */
+public function isDelivery(): bool
+{
+    return $this->role === 'delivery';
+}
+
+
+/**
+ * Delivery profile belonging to this user.
+ */
+public function deliveryProfile(): HasOne
+{
+    return $this->hasOne(
+        DeliveryProfile::class
+    );
+}
+
 
 }

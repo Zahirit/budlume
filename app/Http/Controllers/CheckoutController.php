@@ -6,6 +6,7 @@ use App\Mail\OrderInvoiceMail;
 use App\Models\Customer;
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Services\DeliveryAssignmentService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -248,113 +249,110 @@ class CheckoutController extends Controller
                     ]
                 );
 
-                /*
-                 * Create order with permanent snapshot.
-                 */
-                $order = Order::create([
+  /*
+ * Create order with permanent snapshot.
+ */
+$order = Order::create([
 
-                    'customer_id' =>
-                        $customer->id,
+    'customer_id' =>
+        $customer->id,
 
-                    'customer_type' =>
-                        $customerType,
+    'customer_type' =>
+        $customerType,
 
-                    'order_number' =>
-                        'ORD-' .
-                        strtoupper(Str::random(10)),
+    'order_number' =>
+        'ORD-' .
+        strtoupper(Str::random(10)),
 
-                    /*
-                     * Customer snapshot.
-                     */
-                    'customer_name' =>
-                        $request->name,
+    /*
+     * Customer snapshot.
+     */
+    'customer_name' =>
+        $request->name,
 
-                    'customer_email' =>
-                        $request->email,
+    'customer_email' =>
+        $request->email,
 
-                    'customer_phone' =>
-                        $request->phone,
+    'customer_phone' =>
+        $request->phone,
 
-                    /*
-                     * Delivery address snapshot.
-                     */
-                    'delivery_address_line_1' =>
-                        $request->delivery_address_line_1,
+    /*
+     * Delivery address snapshot.
+     */
+    'delivery_address_line_1' =>
+        $request->delivery_address_line_1,
 
-                    'delivery_address_line_2' =>
-                        $request->delivery_address_line_2,
+    'delivery_address_line_2' =>
+        $request->delivery_address_line_2,
 
-                    'delivery_city' =>
-                        $request->delivery_city,
+    'delivery_city' =>
+        $request->delivery_city,
 
-                    'delivery_state' =>
-                        $request->delivery_state,
+    'delivery_state' =>
+        $request->delivery_state,
 
-                    'delivery_postal_code' =>
-                        $request->delivery_postal_code,
+    'delivery_postal_code' =>
+        $request->delivery_postal_code,
 
-                    'delivery_country' =>
-                        $request->delivery_country,
+    'delivery_country' =>
+        $request->delivery_country,
 
-                    /*
-                     * Pricing snapshot.
-                     */
-                    'subtotal' =>
-                        $subtotal,
+    /*
+     * Pricing snapshot.
+     */
+    'subtotal' =>
+        $subtotal,
 
-                    'discount_percentage' =>
-                        $discountPercentage,
+    'discount_percentage' =>
+        $discountPercentage,
 
-                    'discount_amount' =>
-                        $discountAmount,
+    'discount_amount' =>
+        $discountAmount,
 
-                    'total_amount' =>
-                        $total,
+    'total_amount' =>
+        $total,
 
-                    /*
-                     * Phone already verified.
-                     */
-                    'phone_verified_at' =>
-                        now(),
+    /*
+     * Phone already verified.
+     */
+    'phone_verified_at' =>
+        now(),
 
-                    /*
-                     * Secure order tracking token.
-                     */
-                    'tracking_token' =>
-                        Str::random(64),
+    /*
+     * Secure order tracking token.
+     */
+    'tracking_token' =>
+        Str::random(64),
 
-                    'status' =>
-                        'pending',
-                ]);
+    'status' =>
+        'pending',
+]);
 
-                /*
-                 * Create Order Items.
-                 */
-                foreach (
-                    $cart as $productId => $item
-                ) {
+/*
+ * Create Order Items.
+ */
+foreach ($cart as $productId => $item) {
 
-                    OrderItem::create([
+    OrderItem::create([
 
-                        'order_id' =>
-                            $order->id,
+        'order_id' =>
+            $order->id,
 
-                        'product_id' =>
-                            $productId,
+        'product_id' =>
+            $productId,
 
-                        'quantity' =>
-                            $item['quantity'],
+        'quantity' =>
+            $item['quantity'],
 
-                        'price' =>
-                            $item['price'],
+        'price' =>
+            $item['price'],
 
-                        'subtotal' =>
-                            $item['price']
-                            * $item['quantity'],
-                    ]);
-                }
+        'subtotal' =>
+            $item['price'] * $item['quantity'],
+    ]);
+}
 
-                return $order;
+return $order;
             }
         );
 
@@ -391,6 +389,39 @@ try {
 
             'email' =>
                 $order->customer_email,
+
+            'error' =>
+                $e->getMessage(),
+        ]
+    );
+}
+
+
+
+
+/*
+|--------------------------------------------------------------------------
+| Create Automatic Delivery Offer
+|--------------------------------------------------------------------------
+| Find the nearest approved, available and online delivery partner.
+| Delivery assignment failure must not cancel the customer's order.
+|--------------------------------------------------------------------------
+*/
+
+try {
+
+    app(DeliveryAssignmentService::class)
+        ->offerOrder($order);
+
+} catch (\Throwable $e) {
+
+    Log::error(
+        'Budlume Automatic Delivery Offer Failed',
+        [
+            'order_id' => $order->id,
+
+            'order_number' =>
+                $order->order_number,
 
             'error' =>
                 $e->getMessage(),
